@@ -5,6 +5,8 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.preference.PreferenceActivity;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,7 +49,7 @@ public class Storage extends SQLiteOpenHelper {
      * @param operate
      * @return true si réussi
      */
-    public boolean insertItem  (String label, int montant, boolean operate) {
+    public boolean insertContent (String label, int montant, boolean operate) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
 
@@ -59,9 +61,32 @@ public class Storage extends SQLiteOpenHelper {
         return true;
     }
 
+    public boolean insertHeader (String label) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+
+        contentValues.put("label", label);
+
+        db.insert("item", null, contentValues);
+        return true;
+    }
+
+    /**
+     * supprimer une donnée dans a bdd
+     * @param id
+     * @return
+     */
+    public Integer deleteItem(Integer id)
+    {
+        SQLiteDatabase db = this.getWritableDatabase();
+        return db.delete("item",
+                "id = ? ",
+                new String[] { Integer.toString(id) });
+    }
+
     /**
      *
-     * @return tout les noms des sms recu
+     * @return la liste d'items a afficher
      */
     public ArrayList<Item> getAllItem()
     {
@@ -69,12 +94,18 @@ public class Storage extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor res =  db.rawQuery( "select * from item", null );
         res.moveToFirst();
+        Log.e("storage: ", res.getColumnName(2));
         while(res.isAfterLast() == false){
             String label = res.getString(res.getColumnIndex(SMS_COLUMN_LABEL));
-            int montant = res.getInt(res.getColumnIndex(SMS_COLUMN_MONTANT));
-            boolean operate = res.getInt(res.getColumnIndex(SMS_COLUMN_OPERATE)) > 0;
-            Item item = new Content(label, montant, operate);
-            array_list.add(item);
+
+            if(res.isNull(2)){
+                array_list.add(new SectionItem(label));
+            }else{
+                int montant = res.getInt(res.getColumnIndex(SMS_COLUMN_MONTANT));
+                boolean operate = res.getInt(res.getColumnIndex(SMS_COLUMN_OPERATE)) > 0;
+                array_list.add(new Content(label, montant, operate));
+            }
+
             res.moveToNext();
         }
         return array_list;

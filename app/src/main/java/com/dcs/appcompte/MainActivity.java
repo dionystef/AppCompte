@@ -1,10 +1,9 @@
 package com.dcs.appcompte;
 
-import android.app.Activity;
 import android.app.ListActivity;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.preference.Preference;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -12,21 +11,15 @@ import android.view.View;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.util.ArrayList;
 
 import model.Calcul;
 import model.Content;
 import model.EntryAdapter;
 import model.Item;
-import model.SectionItem;
 import model.Storage;
 
-public class MainActivity extends ListActivity {
+public class MainActivity extends ListActivity implements Preference.OnPreferenceClickListener {
 
     public final static int mainToDetail = 0;
     public EntryAdapter adapter;
@@ -37,7 +30,7 @@ public class MainActivity extends ListActivity {
     private TextView cTotalDepense;
     private TextView cMontantRestant;
     private String STORAGE_FILENAME = "saveAppCompte.txt";
-    private Storage storage;
+    private Storage storage = new Storage(this);
 
 
 
@@ -46,21 +39,18 @@ public class MainActivity extends ListActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // sauvegarde //
-        //storage = new Storage(this);
-       // storage.insertItem();
-        //items = storage.getAllItem();
 
+
+        // assignation des éléments de la vue //
         this.cTotalDepense = (TextView) findViewById(R.id.vTotalDepense);
         this.cMontantRestant = (TextView) findViewById(R.id.vMontantRestant);
+        this.mainList = (ListView) findViewById(android.R.id.list);
 
-        // assignation de la list //
-        mainList = (ListView) findViewById(android.R.id.list);
 
-            // création des items de la list //
-            items.add(new SectionItem("Revenu"));
-            items.add(new Content("salaire net", 1170, true));
-            items.add(new Content("prime", 0, true));
+        items = storage.getAllItem();
+
+
+/*
 
             items.add(new SectionItem("Maison"));
             items.add(new Content("loyer", 530, false));
@@ -79,7 +69,7 @@ public class MainActivity extends ListActivity {
             items.add(new Content("transport en commun", 20, false));
             items.add(new Content("essence", 80, false));
             items.add(new Content("assurance moto", 24, false));
-
+*/
 
         adapter = new EntryAdapter(this, items, mainActivity);
 
@@ -92,6 +82,12 @@ public class MainActivity extends ListActivity {
 
         cTotalDepense.setText(String.valueOf(tempTotal));
         cMontantRestant.setText(String.valueOf(tempDepense));
+    }
+
+    @Override
+    public boolean onPreferenceClick(Preference preference) {
+
+        return false;
     }
 
     @Override
@@ -146,6 +142,23 @@ public class MainActivity extends ListActivity {
             }
         }
     }
+
+    private ArrayList <Item> createList(){
+
+        // création des items de la list //
+        storage.insertHeader("Revenu");
+        storage.insertContent("salaire net", 1170, true);
+        storage.insertContent("prime", 0, true);
+
+        storage.insertHeader("Transport");
+        storage.insertContent("transport en commun", 20, false);
+        storage.insertContent("essence", 80, false);
+        storage.insertContent("assurance moto", 24, false);
+
+        return storage.getAllItem();
+    }
+
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

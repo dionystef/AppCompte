@@ -24,7 +24,6 @@ public class Calcul {
 
                 if (item.operate == false) {
                     int sortie = item.montant;
-                    Log.e("calcul totaux: ", String.valueOf(item.montant));
                     total = sortie + total;
                 }
             }
@@ -53,8 +52,6 @@ public class Calcul {
             }
         }
         reste = rentrerTotal - fraisTotaux(items);
-        Log.e("frais totaux", String.valueOf(fraisTotaux(items)));
-        Log.e("sortie totale", String.valueOf(rentrerTotal));
 
         return reste;
     }
